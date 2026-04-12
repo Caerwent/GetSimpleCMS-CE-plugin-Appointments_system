@@ -20,7 +20,7 @@ global $SITEURL;
 
 <form method="POST" id="appointmentBookingForm">
 <?php  // TODO manage nonce in session ?>
-<input type="hidden" name="appointment_nonce" value="<?php //echo appointment_generate_nonce(); ?>">
+<input type="hidden" name="appointment_nonce" value="<?php echo appointment_generate_nonce(); ?>">
 <input type="hidden" name="appointment_time" id="appointmentTime">
 
 <!-- Étape 1: Sélection de la date -->

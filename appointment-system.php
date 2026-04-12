@@ -19,7 +19,7 @@ if (!defined('IN_GS')) {
 # Plugin configuration
 $thisfile=basename(__FILE__, ".php");
 define('APPOINTMENT_PLUGIN_ID', $thisfile);
-define('APPOINTMENT_PLUGIN_NAME', $thisfile);
+define('APPOINTMENT_PLUGIN_NAME', 'Appointment system');
 define('APPOINTMENT_VERSION', '1.0.0');
 define('APPOINTMENT_PATH', GSPLUGINPATH . $thisfile.'/');
 define('APPOINTMENT_LANG_PATH', APPOINTMENT_PATH . 'lang/');
@@ -47,9 +47,9 @@ register_plugin(
     APPOINTMENT_PLUGIN_ID,
     APPOINTMENT_PLUGIN_NAME,
     APPOINTMENT_VERSION,
-    'Votre Nom',
-    'https://votresite.com',
-    'Système de gestion de rendez-vous avec créneaux récurrents',
+    'Caerwent',
+    'https://github.com/Caerwent/GetSimpleCMS-CE-plugin-Appointments_system',
+    'Appointments booking system with periodic slots and exceptions',
     'plugins',
     'appointment_admin_page'
 );
@@ -57,7 +57,7 @@ register_plugin(
 # Add admin menu
 add_action('plugins-sidebar', 'createSideMenu', array(
     APPOINTMENT_PLUGIN_ID,
-    APPOINTMENT_PLUGIN_NAME,
+    APPOINTMENT_PLUGIN_NAME.' 📅',
     "appointment_admin_page"
 ));
 
@@ -66,8 +66,7 @@ add_filter('content', 'appointment_process_shortcodes');
 
 # Initialize database
 add_action('index-pretemplate', 'appointment_init_db');
-# Nonce
-add_action('index-pretemplate', 'appointment_generate_nonce');
+
 
 # Hook to intercept API requests
 appointment_api_router();
@@ -139,14 +138,14 @@ function appointment_handle_booking() {
         'message' => ''
     ];
 
-    // TODO manage nonce in session
+
     // Validate CSRF token
-    //if (!isset($_POST['appointment_nonce']) ||
-    //    $_POST['appointment_nonce'] !== appointment_generate_nonce()) {
-    //    $result['message'] = i18n_r(APPOINTMENT_PLUGIN_ID . '/ERROR_INVALID_REQUEST', 'Invalid request');
-    //    $_SESSION['appointment_result'] = $result;
-    //    return;
-    //}
+    if (!isset($_POST['appointment_nonce']) ||
+         !appointment_verify_nonce($_POST['appointment_nonce'])) {
+        $result['message'] = i18n_r(APPOINTMENT_PLUGIN_ID . '/ERROR_INVALID_REQUEST', 'Invalid request');
+        $_SESSION['appointment_result'] = $result;
+        return;
+    }
 
     // Sanitize inputs
     $date = appointment_sanitize_input($_POST['appointment_date'] ?? '');
@@ -238,13 +237,23 @@ function appointment_sanitize_input($data) {
  * Generate nonce for CSRF protection
  */
 function appointment_generate_nonce() {
-    if (!isset($_SESSION['appointment_nonce'])) {
-        $_SESSION['appointment_nonce'] = bin2hex(random_bytes(32));
-    }
-    return $_SESSION['appointment_nonce'];
+    $secret = md5(APPOINTMENT_URL);
+    // 1 hour validity duration
+    return hash_hmac('sha256', 'appointment_' . date('YmdH'), $secret);
+}
+function appointment_verify_nonce($token) {
+    if (!defined('IN_GS')) return false;
+     $secret = md5(APPOINTMENT_URL);
+    // 1 hour validity duration : accept current hour or previous hour
+    $current = hash_hmac('sha256', 'appointment_' . date('YmdH'), $secret);
+    $prev    = hash_hmac('sha256', 'appointment_' . date('YmdH', strtotime('-1 hour')), $secret);
+    return hash_equals($current, (string)$token)
+        || hash_equals($prev,    (string)$token);
 }
 
 if(AppointmentSettings::get('use_site_theme', '0')==='0') {
     register_style('appointmentstyle', APPOINTMENT_URL_PATH.'css/appointment-frontend.css', GSVERSION.'-rev1', 'screen');
     queue_style('appointmentstyle',GSBOTH);
 }
+
+
