@@ -73,7 +73,12 @@ $i18n = array(
     'LABEL_STATUS' => 'Status',
     'LABEL_NOTES' => 'Notes',
     'LABEL_REASON' => 'Reason',
+    'LABEL_DURATION' => 'Duration',
     'LABEL_SELECT_DATE' => 'Select a date',
+
+    'DURATION_DAY' => 'Day',
+    'DURATION_AM' => 'AM',
+    'DURATION_PM' => 'PM',
 
     // Days of week
     'DAY_MONDAY' => 'Monday',

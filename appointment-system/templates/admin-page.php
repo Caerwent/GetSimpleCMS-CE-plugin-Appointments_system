@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Add exception
     if (isset($_POST['add_exception'])) {
-        if (AppointmentException::create($_POST['exception_date'], $_POST['reason'])) {
+        if (AppointmentException::create($_POST['exception_date'], $_POST['reason'], (int)$_POST['duration'])) {
             $message = i18n_r(APPOINTMENT_PLUGIN_ID . '/SUCCESS_EXCEPTION_ADDED');
             $messageType = 'success';
         }
@@ -338,6 +338,15 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
                         <td><input type="date" name="exception_date" required></td>
                     </tr>
                     <tr>
+                        <td><label><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/LABEL_DURATION'); ?>:</label></td>
+                        <td><select name="duration">
+                                <option value="0"><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/DURATION_DAY'); ?></option>
+                                <option value="1"><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/DURATION_AM'); ?></option>
+                                <option value="2"><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/DURATION_PM'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
                         <td><label><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/LABEL_REASON'); ?>:</label></td>
                         <td><input type="text" name="reason" placeholder="<?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/PLACEHOLDER_REASON'); ?>"></td>
                     </tr>
@@ -357,6 +366,7 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
                     <thead>
                         <tr>
                             <th><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/LABEL_DATE'); ?></th>
+                            <th><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/LABEL_DURATION'); ?></th>
                             <th><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/LABEL_REASON'); ?></th>
                             <th><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/LABEL_ACTIONS'); ?></th>
                         </tr>
@@ -365,6 +375,9 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
                         <?php foreach ($exceptions as $exc): ?>
                             <tr>
                                 <td><strong><?php echo appointment_format_date($exc['exception_date']); ?></strong></td>
+                                <td><?php if($exc['duration']==0) echo i18n_r(APPOINTMENT_PLUGIN_ID . '/DURATION_DAY');
+                                else if($exc['duration']==1) echo i18n_r(APPOINTMENT_PLUGIN_ID . '/DURATION_AM');
+                                else if($exc['duration']==2) echo i18n_r(APPOINTMENT_PLUGIN_ID . '/DURATION_PM');?></td>
                                 <td><?php echo htmlspecialchars($exc['reason'] ?? '-'); ?></td>
                                 <td>
                                     <form method="POST" style="display:inline;">

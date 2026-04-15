@@ -74,6 +74,7 @@ class AppointmentDatabase {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             exception_date DATE NOT NULL UNIQUE,
             reason TEXT,
+            duration INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
         ");
@@ -150,13 +151,19 @@ class AppointmentTimeSlot {
             $db = AppointmentDatabase::getInstance()->getConnection();
 
             // Vérifier si c'est un jour d'exception
-            $stmt = $db->prepare("SELECT COUNT(*) as count FROM exceptions WHERE exception_date = :date");
+            $stmt = $db->prepare("SELECT COUNT(*) as count, duration FROM exceptions WHERE exception_date = :date");
             $stmt->bindValue(':date', $date, SQLITE3_TEXT);
             $result = $stmt->execute();
-            $row = $result->fetchArray(SQLITE3_ASSOC);
+            $exceptionDays = $result->fetchArray(SQLITE3_ASSOC);
 
-            if ($row['count'] > 0) {
-                return [];
+            $exception = 0;
+            if ($exceptionDays['count'] > 0) {
+                if($exceptionDays['duration']==0) {
+                    return [];
+                } else {
+                    $exception = $exceptionDays['duration'];
+                }
+
             }
 
             // Obtenir le jour de la semaine (1 = lundi, 7 = dimanche)
@@ -170,39 +177,46 @@ class AppointmentTimeSlot {
             $availableSlots = [];
 
             while ($slot = $result->fetchArray(SQLITE3_ASSOC)) {
+
                 // Générer les créneaux basés sur la durée
                 $start = strtotime($slot['start_time']);
                 $end = strtotime($slot['end_time']);
+
                 $duration = $slot['duration'] * 60; // en secondes
 
                 $current = $start;
+
+
                 while ($current + $duration <= $end) {
                     $slotStart = date('H:i', $current);
-                    $slotStart = date('H:i', $current);
                     $slotEnd = date('H:i', $current + $duration);
+                    $hour = date('H', $current);
+                    if(($hour<12 && $exception!=1) ||
+                        ($hour>=12 && $exception!=2)) {
 
-                    // Compter les rendez-vous existants pour ce créneau
-                    $countStmt = $db->prepare("
-                    SELECT COUNT(*) as count
-                    FROM appointments
-                    WHERE appointment_date = :date
-                    AND start_time = :start
-                    AND status = 'confirmed'
-                    ");
-                    $countStmt->bindValue(':date', $date, SQLITE3_TEXT);
-                    $countStmt->bindValue(':start', $slotStart, SQLITE3_TEXT);
-                    $countResult = $countStmt->execute();
-                    $countRow = $countResult->fetchArray(SQLITE3_ASSOC);
+                        // Compter les rendez-vous existants pour ce créneau
+                        $countStmt = $db->prepare("
+                        SELECT COUNT(*) as count
+                        FROM appointments
+                        WHERE appointment_date = :date
+                        AND start_time = :start
+                        AND status = 'confirmed'
+                        ");
+                        $countStmt->bindValue(':date', $date, SQLITE3_TEXT);
+                        $countStmt->bindValue(':start', $slotStart, SQLITE3_TEXT);
+                        $countResult = $countStmt->execute();
+                        $countRow = $countResult->fetchArray(SQLITE3_ASSOC);
 
-                    $booked = $countRow['count'];
-                    $available = $slot['max_appointments'] - $booked;
+                        $booked = $countRow['count'];
+                        $available = $slot['max_appointments'] - $booked;
 
-                    if ($available > 0) {
-                        $availableSlots[] = [
-                            'start' => $slotStart,
-                            'end' => $slotEnd,
-                            'available' => $available
-                        ];
+                        if ($available > 0) {
+                            $availableSlots[] = [
+                                'start' => $slotStart,
+                                'end' => $slotEnd,
+                                'available' => $available
+                            ];
+                        }
                     }
 
                     $current += $duration;
@@ -352,17 +366,18 @@ class AppointmentBooking {
  */
 class AppointmentException {
 
-    public static function create($date, $reason = '') {
+    public static function create($date, $reason = '', $duration=0) {
         try {
             $db = AppointmentDatabase::getInstance()->getConnection();
 
             $stmt = $db->prepare("
-            INSERT OR REPLACE INTO exceptions (exception_date, reason)
-            VALUES (:date, :reason)
+            INSERT OR REPLACE INTO exceptions (exception_date, reason, duration)
+            VALUES (:date, :reason, :duration)
             ");
 
             $stmt->bindValue(':date', $date, SQLITE3_TEXT);
             $stmt->bindValue(':reason', $reason, SQLITE3_TEXT);
+            $stmt->bindValue(':duration', $duration, SQLITE3_INTEGER);
 
             return $stmt->execute() !== false;
         } catch (Exception $e) {

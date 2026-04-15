@@ -58,6 +58,7 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
 
         $mail = new PHPMailer\PHPMailer\PHPMailer();
 
+        $mail->SMTPDebug  = 2;
         $mail->IsSMTP();
         $mail->CharSet="UTF-8";
         $mail->Host = $servername;
@@ -65,7 +66,8 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
         $mail->Port = $portname;
 
         if($ssl == "true"){
-        $mail->SMTPSecure = 'ssl';
+        //$mail->SMTPSecure = 'ssl';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         };
 
 
@@ -88,6 +90,8 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
 
             if(!$mail->Send()){
                 $sended = false;
+                error_log('appointment_send_confirmation_email Error info: ' . $mail->ErrorInfo);
+
             } else {
                 $sended = true;
             }
@@ -164,7 +168,7 @@ function appointment_send_admin_notification($clientName, $clientEmail, $date, $
 
 
         $mail = new PHPMailer\PHPMailer\PHPMailer();
-
+$mail->SMTPDebug  = 2;
         $mail->IsSMTP();
         $mail->CharSet="UTF-8";
         $mail->Host = $servername;
@@ -172,7 +176,8 @@ function appointment_send_admin_notification($clientName, $clientEmail, $date, $
         $mail->Port = $portname;
 
         if($ssl == "true"){
-        $mail->SMTPSecure = 'ssl';
+        //$mail->SMTPSecure = 'ssl';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         };
 
 
@@ -195,6 +200,7 @@ function appointment_send_admin_notification($clientName, $clientEmail, $date, $
 
             if(!$mail->Send()){
                 $sended = false;
+                error_log('appointment_send_confirmation_email Error info: ' . $mail->ErrorInfo);
             } else {
                 $sended = true;
             }

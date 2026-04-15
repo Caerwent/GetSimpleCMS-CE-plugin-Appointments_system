@@ -11,9 +11,9 @@ if (!defined('IN_GS')) {
     die('You cannot load this page directly.');
 }
 
-//ini_set('display_errors', 1);
-//ini_set('display_startup_errors', 1);
-//error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 # Plugin configuration
@@ -74,7 +74,6 @@ appointment_api_router();
  * Initialize database
  */
 function appointment_init_db() {
-     error_log('Appointment Init DB');
     try {
         AppointmentDatabase::getInstance();
     } catch (Exception $e) {
