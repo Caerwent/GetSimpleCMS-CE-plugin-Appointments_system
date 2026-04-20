@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         AppointmentSettings::set('use_site_theme', isset($_POST['use_site_theme']) ? '1' : '0');
         AppointmentSettings::set('mail_footer', $_POST['mail_footer']);
 
-        file_put_contents(APPOINTMENT_PATH.'/security/pass',$_POST['password']);
+        file_put_contents(APPOINTMENT_PATH.'/security/pass', base64_encode($_POST['password']));
         $message = i18n_r(APPOINTMENT_PLUGIN_ID . '/SUCCESS_SETTINGS_SAVED');
         $messageType = 'success';
     }

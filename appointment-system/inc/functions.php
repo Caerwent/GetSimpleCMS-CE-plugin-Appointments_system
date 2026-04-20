@@ -43,11 +43,11 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
 
         $ssl = isset($settings['use_ssl']) && !empty($settings['use_ssl'])
         ? $settings['use_ssl']
-        : false;
+        : '0';
 
         $authcheck = isset($settings['authent_check']) && !empty($settings['authent_check'])
         ? $settings['authent_check']
-        : false;
+        : '0';
 
         $mailFooter = isset($settings['mail_footer']) && !empty($settings['mail_footer'])
         ? $settings['mail_footer']
@@ -65,22 +65,22 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
         $message = ob_get_clean();
 
 
-        $mail = new PHPMailer\PHPMailer\PHPMailer();
+        //Create an instance; passing `true` enables exceptions
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
-        $mail->SMTPDebug  = 2;
+        $mail->SMTPDebug  = 0;
         $mail->IsSMTP();
         $mail->CharSet="UTF-8";
         $mail->Host = $servername;
-        $mail->SMTPDebug = 0;
         $mail->Port = $portname;
 
-        if($ssl == "true"){
+        if($ssl ==='1'){
         //$mail->SMTPSecure = 'ssl';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         };
 
 
-        if($authcheck  == "true"){
+        if($authcheck  ==='1'){
             $mail->SMTPAuth = true;
         }
 
@@ -89,12 +89,10 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
         $mail->Password =  base64_decode($passwordfile) ;
         $mail->setFrom($senderEmail, $siteName);
 
-
         $mail->Subject = $subject;
         $mail->Body = html_entity_decode($message);
-
         if($email !== '' ){
-            $mail->addAddress("$email");
+            $mail->addAddress($email);
             //$success = $mail->Send();
 
             if(!$mail->Send()){
@@ -164,11 +162,11 @@ function appointment_send_admin_notification($clientName, $clientEmail, $date, $
 
         $ssl = isset($settings['use_ssl']) && !empty($settings['use_ssl'])
         ? $settings['use_ssl']
-        : false;
+        : '0';
 
         $authcheck = isset($settings['authent_check']) && !empty($settings['authent_check'])
         ? $settings['authent_check']
-        : false;
+        : '0';
 
         $passwordfile = @file_get_contents(APPOINTMENT_PATH.'/security/pass');
 
@@ -186,27 +184,28 @@ function appointment_send_admin_notification($clientName, $clientEmail, $date, $
         $message .= "</body></html>";
 
 
-        $mail = new PHPMailer\PHPMailer\PHPMailer();
+        //Create an instance; passing `true` enables exceptions
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
         $mail->IsSMTP();
         $mail->CharSet="UTF-8";
         $mail->Host = $servername;
         $mail->SMTPDebug = 0; // 2 to debug
         $mail->Port = $portname;
 
-        if($ssl == "true"){
+         if($ssl ==='1'){
         //$mail->SMTPSecure = 'ssl';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         };
 
 
-        if($authcheck  == "true"){
+        if($authcheck  ==='1'){
             $mail->SMTPAuth = true;
         }
 
         $mail->IsHTML(true);
-        $mail->Username = $adminEmail;
+        $mail->Username = $senderEmail;
         $mail->Password =  base64_decode($passwordfile) ;
-        $mail->setFrom($adminEmail, $siteName);
+        $mail->setFrom($senderEmail, $siteName);
 
 
         $mail->Subject = $subject;

@@ -201,14 +201,23 @@ function appointment_handle_booking() {
         if (AppointmentBooking::create($date, $startTime, $endTime, $name, $email, $phone, $notes)) {
             $result['success'] = true;
             if(AppointmentSettings::get('enable_notifications', '0')==='1') {
-                $result['message'] = i18n_r(APPOINTMENT_PLUGIN_ID . '/SUCCESS_BOOKING', 'Your appointment has been confirmed! You will receive a confirmation email.');
+
                 // Send confirmation email
-                appointment_send_confirmation_email($email, $name, $date, $startTime, $endTime);
+                $isMailSent = appointment_send_confirmation_email($email, $name, $date, $startTime, $endTime);
+                 if($isMailSent == true)
+                 {
+                    $result['message'] = i18n_r(APPOINTMENT_PLUGIN_ID . '/SUCCESS_BOOKING', 'Your appointment has been confirmed! You will receive a confirmation email.');
+                 }
+                 else
+                 {
+                     $result['message'] = i18n_r(APPOINTMENT_PLUGIN_ID . '/SUCCESS_BOOKING_NO_MAIL', 'Your appointment has been confirmed!');
+                 }
 
                 // Send admin notification
                 appointment_send_admin_notification($name, $email, $date, $startTime);
+
             } else {
-                $result['message'] = i18n_r(APPOINTMENT_PLUGIN_ID . '/SUCCESS_BOOKING_NO_MAIL', 'Booking confirmed!');
+                $result['message'] = i18n_r(APPOINTMENT_PLUGIN_ID . '/SUCCESS_BOOKING_NO_MAIL', 'Your appointment has been confirmed!');
             }
 
 

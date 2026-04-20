@@ -22,24 +22,24 @@ body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
 </div>
 
 <div class="content">
-<h2><?php echo i18n_r('EMAIL_GREETING', 'Hello'); ?> <?php echo htmlspecialchars($name); ?>,</h2>
+<h2><?php echo i18n_r(APPOINTMENT_PLUGIN_ID.'/EMAIL_GREETING', 'Hello'); ?> <?php echo htmlspecialchars($name); ?>,</h2>
 
-<p><?php echo i18n_r('EMAIL_CONFIRMATION_TEXT', 'Your appointment has been confirmed'); ?></p>
+<p><?php echo i18n_r(APPOINTMENT_PLUGIN_ID.'/EMAIL_CONFIRMATION_TEXT', 'Your appointment has been confirmed'); ?></p>
 
 <div class="info-box">
-<strong><?php echo i18n_r('LABEL_DATE', 'Date'); ?>:</strong>
+<strong><?php echo i18n_r(APPOINTMENT_PLUGIN_ID.'/LABEL_DATE', 'Date'); ?>:</strong>
 <?php echo $dayName . ' ' . $dateFormatted; ?><br>
 
-<strong><?php echo i18n_r('LABEL_TIME', 'Time'); ?>:</strong>
+<strong><?php echo i18n_r(APPOINTMENT_PLUGIN_ID.'/LABEL_TIME', 'Time'); ?>:</strong>
 <?php echo htmlspecialchars($startTime) . ' - ' . htmlspecialchars($endTime); ?>
 </div>
 
-<p><?php echo i18n_r('EMAIL_REMINDER_TEXT', 'We look forward to seeing you'); ?></p>
+<p><?php echo i18n_r(APPOINTMENT_PLUGIN_ID.'/EMAIL_REMINDER_TEXT', 'We look forward to seeing you'); ?></p>
 </div>
 
 <div class="footer">
 <?php echo html_entity_decode($mailFooter);?>
-<p><?php echo i18n_r('EMAIL_FOOTER_TEXT', 'Automated email'); ?></p>
+<p><?php echo i18n_r(APPOINTMENT_PLUGIN_ID.'/EMAIL_FOOTER_TEXT', 'Automated email'); ?></p>
 <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($siteName); ?></p>
 </div>
 </div>
