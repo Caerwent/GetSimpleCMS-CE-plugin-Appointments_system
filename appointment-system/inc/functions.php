@@ -8,7 +8,7 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
     try {
         $settings = AppointmentSettings::getAll();
 
-        // Vérifier si les notifications sont activées
+        // check if notifications activated
         if (isset($settings['enable_notifications']) && $settings['enable_notifications'] !== '1') {
             return false;
         }
@@ -24,9 +24,14 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
         ? $settings['site_name']
         : (isset($SITENAME) ? $SITENAME : 'Mon Site');
 
-        $adminEmail = isset($settings['admin_email']) && !empty($settings['admin_email'])
-        ? $settings['admin_email']
-        : appointment_get_site_email();
+        $senderEmail = isset($settings['sender_email']) && !empty($settings['sender_email'])
+        ? $settings['sender_email']
+        : "";
+
+        if (empty($senderEmail) || !filter_var($senderEmail, FILTER_VALIDATE_EMAIL)) {
+            error_log('appointment_send_confirmation_email Error (invalid sender mail): ' . $senderEmail);
+            return false;
+        }
 
         $servername = isset($settings['server_name']) && !empty($settings['server_name'])
         ? $settings['server_name']
@@ -43,6 +48,10 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
         $authcheck = isset($settings['authent_check']) && !empty($settings['authent_check'])
         ? $settings['authent_check']
         : false;
+
+        $mailFooter = isset($settings['mail_footer']) && !empty($settings['mail_footer'])
+        ? $settings['mail_footer']
+        : "";
 
         $passwordfile = @file_get_contents(APPOINTMENT_PATH.'/security/pass');
 
@@ -76,9 +85,9 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
         }
 
         $mail->IsHTML(true);
-        $mail->Username = $adminEmail;
+        $mail->Username = $senderEmail;
         $mail->Password =  base64_decode($passwordfile) ;
-        $mail->setFrom($adminEmail, $siteName);
+        $mail->setFrom($senderEmail, $siteName);
 
 
         $mail->Subject = $subject;
@@ -90,7 +99,7 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
 
             if(!$mail->Send()){
                 $sended = false;
-                error_log('appointment_send_confirmation_email Error info: ' . $mail->ErrorInfo);
+                error_log('appointment_send_confirmation_email Error info: '. $mail->ErrorInfo);
 
             } else {
                 $sended = true;
@@ -100,8 +109,8 @@ function appointment_send_confirmation_email($email, $name, $date, $startTime, $
         }
         return $sended ;
     } catch (Exception $e) {
-        error_log('appointment_send_confirmation_email Error: ' . $e->getMessage());
-           return false;
+        error_log('appointment_send_confirmation_email Error: '. $e->getMessage());
+         return false;
     }
 }
 
@@ -112,7 +121,7 @@ function appointment_send_admin_notification($clientName, $clientEmail, $date, $
     try {
         $settings = AppointmentSettings::getAll();
 
-        // Vérifier si les notifications sont activées
+        // check if notifications activated
         if (isset($settings['enable_notifications']) && $settings['enable_notifications'] !== '1') {
             return false;
         }
@@ -122,6 +131,16 @@ function appointment_send_admin_notification($clientName, $clientEmail, $date, $
         : appointment_get_site_email();
 
         if (empty($adminEmail) || !filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+            error_log('appointment_send_confirmation_email Error (invalid admin mail): '. $adminEmail);
+            return false;
+        }
+
+        $senderEmail = isset($settings['sender_email']) && !empty($settings['sender_email'])
+        ? $settings['sender_email']
+        : "";
+
+        if (empty($senderEmail) || !filter_var($senderEmail, FILTER_VALIDATE_EMAIL)) {
+            error_log('appointment_send_confirmation_email Error (invalid sender mail): '. $senderEmail);
             return false;
         }
 
@@ -168,11 +187,10 @@ function appointment_send_admin_notification($clientName, $clientEmail, $date, $
 
 
         $mail = new PHPMailer\PHPMailer\PHPMailer();
-$mail->SMTPDebug  = 2;
         $mail->IsSMTP();
         $mail->CharSet="UTF-8";
         $mail->Host = $servername;
-        $mail->SMTPDebug = 0;
+        $mail->SMTPDebug = 0; // 2 to debug
         $mail->Port = $portname;
 
         if($ssl == "true"){
@@ -196,7 +214,6 @@ $mail->SMTPDebug  = 2;
 
         if($adminEmail !== '' ){
             $mail->addAddress("$adminEmail");
-            //$success = $mail->Send();
 
             if(!$mail->Send()){
                 $sended = false;
@@ -243,7 +260,7 @@ function appointment_get_site_email() {
         return $SITEEMAIL;
     }
 
-    // Fallback : lire depuis le fichier de configuration
+    // Fallback : get site mail from site configuration file
     if (defined('GSDATAOTHERPATH')) {
         $config_file = GSDATAOTHERPATH . 'website.xml';
         if (file_exists($config_file)) {

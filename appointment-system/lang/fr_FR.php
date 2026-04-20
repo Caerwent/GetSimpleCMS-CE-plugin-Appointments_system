@@ -52,7 +52,10 @@ $i18n = array(
     'SETTING_SMTP_SERVER_PORT'=>'Port du serveur sortant SMTP',
     'SETTING_SMTP_USE_SSL'=>'Utiliser SSL ?',
     'SETTING_SMTP_AUTHENT' => 'Utiliser l\'authentification ?',
+    'SETTING_SMTP_EMAIL' => 'Email expéditeur',
+    'SETTING_SMTP_EMAIL_HINT' => 'Email pour envoyer les mails de notifications et confirmations',
     'SETTING_SMTP_PASSWORD' => 'Mot de passe du compte SMTP expéditeur',
+    'CONFIRM_MAIL_FOOTER' => 'Texte à ajouter en fin de mail de confirmation',
     'USE_SITE_THEME' => 'Utiliser le thème du site pour le formulaire',
     'USE_SITE_THEME_HINT' => 'Vous devrez ajouter les styles suivants dans votre thème ',
 

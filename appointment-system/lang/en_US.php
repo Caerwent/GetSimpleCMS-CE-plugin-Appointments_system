@@ -52,7 +52,10 @@ $i18n = array(
     'SETTING_SMTP_SERVER_PORT'=>'SMTP Port',
     'SETTING_SMTP_USE_SSL'=>'Uses SSL ?',
     'SETTING_SMTP_AUTHENT' => 'Requires Authorization ?',
+    'SETTING_SMTP_EMAIL' => 'Sender Email',
+    'SETTING_SMTP_EMAIL_HINT' => 'Email used to send notification and confirmation emails',
     'SETTING_SMTP_PASSWORD' => 'SMTP User Password',
+     'CONFIRM_MAIL_FOOTER' => 'Text to add at the end of the confirmation email',
     'USE_SITE_THEME' => 'Use the site\'s theme for the form',
     'USE_SITE_THEME_HINT' => 'You will need to add the following styles to your theme: ',
 

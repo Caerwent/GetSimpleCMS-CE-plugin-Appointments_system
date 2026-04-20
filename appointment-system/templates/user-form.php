@@ -23,7 +23,7 @@ global $SITEURL;
 <input type="hidden" name="appointment_nonce" value="<?php echo appointment_generate_nonce(); ?>">
 <input type="hidden" name="appointment_time" id="appointmentTime">
 
-<!-- Étape 1: Sélection de la date -->
+<!-- Step 1: date selection -->
 <div class="appointment-step" id="step1">
 <h4><i class="fa fa-calendar"></i> <?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/STEP1_TITLE', 'Choose a date'); ?></h4>
 <div class="appointment-form-group">
@@ -37,7 +37,7 @@ required>
 </div>
 </div>
 
-<!-- Étape 2: Sélection du créneau -->
+<!-- Step 2: slot selection -->
 <div class="appointment-step step-hidden" id="step2">
 <h4><i class="fa fa-clock-o"></i> <?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/STEP2_TITLE', 'Choose a time slot'); ?></h4>
 <div class="loading-spinner" id="loadingSlots">
@@ -46,7 +46,7 @@ required>
 <div id="timeSlotsContainer"></div>
 </div>
 
-<!-- Étape 3: Informations personnelles -->
+<!-- Step 3: contact informations -->
 <div class="appointment-step step-hidden" id="step3">
 <h4><i class="fa fa-user"></i> <?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/STEP3_TITLE', 'Your information'); ?></h4>
 
@@ -98,7 +98,7 @@ required>
     const timeSlotsContainer = document.getElementById('timeSlotsContainer');
     const appointmentTimeInput = document.getElementById('appointmentTime');
 
-    // Gestion de la sélection de date
+    // detect date selection change
     dateInput.addEventListener('change', function() {
         selectedDate = this.value;
         if (selectedDate) {
@@ -108,7 +108,7 @@ required>
         }
     });
 
-    // Chargement des créneaux disponibles
+    // load available slots for selected date
     function loadTimeSlots(date) {
         loadingSlots.style.display = 'block';
         timeSlotsContainer.innerHTML = '';
@@ -155,7 +155,7 @@ required>
             });
     }
 
-    // Mise à jour du résumé de la date
+    // Update date resume
     if(dateInput)
         dateInput.addEventListener('change', function() {
             if (this.value) {
@@ -165,7 +165,7 @@ required>
             }
         });
 
-    // Validation du formulaire
+    // Submit form action
     document.getElementById('appointmentBookingForm').addEventListener('submit', function(e) {
         if (!selectedDate || !selectedTime) {
             e.preventDefault();

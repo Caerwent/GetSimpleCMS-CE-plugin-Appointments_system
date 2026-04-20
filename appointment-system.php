@@ -24,7 +24,7 @@ define('APPOINTMENT_VERSION', '1.0.0');
 define('APPOINTMENT_PATH', GSPLUGINPATH . $thisfile.'/');
 define('APPOINTMENT_LANG_PATH', APPOINTMENT_PATH . 'lang/');
 
-// URL du plugin
+// Plugin URL
 global $SITEURL;
 $appointment_url = $SITEURL .basename(__FILE__).'/';
 define('APPOINTMENT_URL', $appointment_url);
@@ -33,7 +33,7 @@ define('APPOINTMENT_DB', GSDATAOTHERPATH . 'appointments.db');
 
 
 
-# add in this plugin's language file
+# init plugin's language file
 i18n_merge(APPOINTMENT_PLUGIN_ID) || i18n_merge(APPOINTMENT_PLUGIN_ID, 'en_US');
 
 
@@ -70,6 +70,7 @@ add_action('index-pretemplate', 'appointment_init_db');
 
 # Hook to intercept API requests
 appointment_api_router();
+
 /**
  * Initialize database
  */
@@ -123,6 +124,7 @@ function appointment_api_router() {
  * Main admin page
  */
 function appointment_admin_page() {
+    global $SITEURL;
     include(APPOINTMENT_PATH . 'templates/admin-page.php');
 }
 

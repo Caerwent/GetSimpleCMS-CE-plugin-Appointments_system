@@ -10,16 +10,16 @@ class AppointmentDatabase {
 
     private function __construct() {
         try {
-            // Vérifier que le dossier existe
+            // Check folder exists
             if (!file_exists(GSDATAOTHERPATH)) {
                 mkdir(GSDATAOTHERPATH, 0755, true);
             }
 
-            // Créer ou ouvrir la base de données
+            // Open or create database
             $this->db = new SQLite3(APPOINTMENT_DB);
             $this->db->busyTimeout(5000);
 
-            // Créer les tables
+            // Create tables
             $this->createTables();
         } catch (Exception $e) {
             error_log('AppointmentDatabase Error: ' . $e->getMessage());
@@ -39,7 +39,7 @@ class AppointmentDatabase {
     }
 
     private function createTables() {
-        // Table des créneaux horaires
+        // Slots table
         $this->db->exec("
         CREATE TABLE IF NOT EXISTS time_slots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +52,7 @@ class AppointmentDatabase {
         )
         ");
 
-        // Table des rendez-vous
+        // Appointments table
         $this->db->exec("
         CREATE TABLE IF NOT EXISTS appointments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,7 +68,7 @@ class AppointmentDatabase {
         )
         ");
 
-        // Table des exceptions (jours fermés)
+        //  Closed days table
         $this->db->exec("
         CREATE TABLE IF NOT EXISTS exceptions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +79,7 @@ class AppointmentDatabase {
         )
         ");
 
-        // Table des paramètres
+        // Settings table
         $this->db->exec("
         CREATE TABLE IF NOT EXISTS settings (
             setting_key TEXT PRIMARY KEY,
@@ -150,7 +150,7 @@ class AppointmentTimeSlot {
         try {
             $db = AppointmentDatabase::getInstance()->getConnection();
 
-            // Vérifier si c'est un jour d'exception
+            // Check closed day overlap
             $stmt = $db->prepare("SELECT COUNT(*) as count, duration FROM exceptions WHERE exception_date = :date");
             $stmt->bindValue(':date', $date, SQLITE3_TEXT);
             $result = $stmt->execute();
@@ -166,10 +166,10 @@ class AppointmentTimeSlot {
 
             }
 
-            // Obtenir le jour de la semaine (1 = lundi, 7 = dimanche)
+            // Gt day of week (1 = Monday, 7 = Sunday)
             $dayOfWeek = date('N', strtotime($date));
 
-            // Récupérer les créneaux pour ce jour
+            // Get slots for this day
             $stmt = $db->prepare("SELECT * FROM time_slots WHERE day_of_week = :day ORDER BY start_time");
             $stmt->bindValue(':day', $dayOfWeek, SQLITE3_INTEGER);
             $result = $stmt->execute();
@@ -178,11 +178,11 @@ class AppointmentTimeSlot {
 
             while ($slot = $result->fetchArray(SQLITE3_ASSOC)) {
 
-                // Générer les créneaux basés sur la durée
+                // Build slots using start time, end time and slot duration
                 $start = strtotime($slot['start_time']);
                 $end = strtotime($slot['end_time']);
 
-                $duration = $slot['duration'] * 60; // en secondes
+                $duration = $slot['duration'] * 60; // in seconds
 
                 $current = $start;
 
@@ -194,7 +194,7 @@ class AppointmentTimeSlot {
                     if(($hour<12 && $exception!=1) ||
                         ($hour>=12 && $exception!=2)) {
 
-                        // Compter les rendez-vous existants pour ce créneau
+                        // Count appointments for this slot
                         $countStmt = $db->prepare("
                         SELECT COUNT(*) as count
                         FROM appointments

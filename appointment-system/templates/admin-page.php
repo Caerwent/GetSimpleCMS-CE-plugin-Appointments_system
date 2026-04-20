@@ -73,8 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         AppointmentSettings::set('server_port', (int)$_POST['server_port']);
         AppointmentSettings::set('use_ssl', isset($_POST['use_ssl']) ? '1' : '0');
         AppointmentSettings::set('authent_check', isset($_POST['authent_check']) ? '1' : '0');
+        AppointmentSettings::set('sender_email', $_POST['sender_email']);
         AppointmentSettings::set('booking_advance_days', (int)$_POST['booking_advance_days']);
         AppointmentSettings::set('use_site_theme', isset($_POST['use_site_theme']) ? '1' : '0');
+        AppointmentSettings::set('mail_footer', $_POST['mail_footer']);
 
         file_put_contents(APPOINTMENT_PATH.'/security/pass',$_POST['password']);
         $message = i18n_r(APPOINTMENT_PLUGIN_ID . '/SUCCESS_SETTINGS_SAVED');
@@ -94,6 +96,8 @@ $exceptions = AppointmentException::getAll();
 $stats = AppointmentBooking::getStats();
 $settings = AppointmentSettings::getAll();
 $daysOfWeek = appointment_get_days_of_week();
+
+$mainLang = current( explode( '_' , (string) get_site_lang() ) ) ;
 
 // Current tab
 $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
@@ -437,7 +441,7 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
                     <tr>
                         <td><label><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/SETTING_SMTP_SERVER_NAME'); ?></label></td>
                         <td>
-                            <input type="email" name="server_name"
+                            <input type="text" name="server_name"
                                    value="<?php echo htmlspecialchars($settings['server_name'] ?? ''); ?>"
                                    style="width: 100%;"/>
                         </td>
@@ -454,6 +458,15 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
                         <td>
                             <input type="checkbox" name="use_ssl"
                                    <?php echo (isset($settings['use_ssl']) && $settings['use_ssl'] === '1') ? 'checked' : ''; ?>/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/SETTING_SMTP_EMAIL'); ?></label></td>
+                        <td>
+                            <input type="email" name="sender_email"
+                                value="<?php echo htmlspecialchars($settings['sender_email'] ?? ''); ?>"
+                                style="width: 100%;"/>
+                            <span class="hint"><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/SETTING_SMTP_EMAIL_HINT'); ?></span>
                         </td>
                     </tr>
                     <tr>
@@ -480,6 +493,12 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
                         </td>
                     </tr>
                     <tr>
+                        <td><label><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/CONFIRM_MAIL_FOOTER')?></label></td>
+                        <td><textarea name="mail_footer" id="mailFooter" style="box-sizing:border-box;padding:10px;height:250px;width:100%;border:solid 1px #ddd;"><?php echo $settings['mail_footer'] ?? ''; ?></textarea></td>
+
+                    </tr>
+
+                    <tr>
                         <td></td>
                         <td><button type="submit" name="save_settings" class="submit"><?php echo i18n_r(APPOINTMENT_PLUGIN_ID . '/BTN_SAVE_SETTINGS'); ?></button></td>
                     </tr>
@@ -490,5 +509,25 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
 
     </div>
 </div>
+<script type="text/javascript" src="template/js/ckeditor/ckeditor.js?t=3.3.16"></script>
 
+<script type="text/javascript">
+    CKEDITOR.timestamp = "3.3.16";
+    var editor = CKEDITOR.replace( "mailFooter", {
+        skin : "getsimple",
+        forcePasteAsPlainText : true,
+            language : "<?php echo $mainLang;?>",
+            defaultLanguage : "<?php echo $mainLang;?>",
+                entities : false,
+                height: "200px",
+                baseHref : "<?php echo $SITEURL; ?>",
+                tabSpaces:10,
+                filebrowserBrowseUrl : "filebrowser.php?type=all",
+                filebrowserImageBrowseUrl : "filebrowser.php?type=images",
+                filebrowserWindowWidth : "730",
+                filebrowserWindowHeight : "500"
+                ,toolbar: "advanced"
+    });
+
+</script>
 <script src="<?php echo APPOINTMENT_URL_PATH; ?>js/appointment-admin.js"></script>

@@ -38,6 +38,7 @@ body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
 </div>
 
 <div class="footer">
+<?php echo html_entity_decode($mailFooter);?>
 <p><?php echo i18n_r('EMAIL_FOOTER_TEXT', 'Automated email'); ?></p>
 <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($siteName); ?></p>
 </div>
